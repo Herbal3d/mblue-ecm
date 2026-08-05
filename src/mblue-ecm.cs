@@ -11,20 +11,20 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-using org.herbal3d.mblue.Logging;
 
 namespace org.herbal3d.mblue.ecm {
 
     public static class MBlueECMServiceSetup {
 
-        public static IServiceCollection AddServices(this IServiceCollection pServices) {
+        public static IServiceCollection AddServices(this IServiceCollection pServices, IConfiguration pConfig) {
             return pServices
+                .Configure<ECMConfig>(pConfig.GetSection(ECMConfig.subSectionName))
+                .AddTransient<UpdateInfo>()
+                .AddTransient<AuthInfo>()
+                .AddTransient<Entity>()
                 .AddSingleton<EntityFactory>()
                 .AddSingleton<ComponentFactory>()
-                ;
+            ;
         }
     }
 

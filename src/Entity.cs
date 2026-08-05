@@ -21,6 +21,8 @@ namespace org.herbal3d.mblue.ecm {
     public class Entity : IDumpable, IDisposable {
         protected MBLogger<Entity> m_log;
 
+        protected ComponentFactory m_ComponentFactory;
+
         // Every entity has a local, session scoped ID
         protected ulong m_LGID = 0;
         public ulong LGID {
@@ -42,22 +44,39 @@ namespace org.herbal3d.mblue.ecm {
 
 
         public Entity(MBLogger<Entity> pLog,
+                      ComponentFactory pComponentFactory,
                       EntityName pName,
                       Entity? pContainingEntity = null) {
             m_log = pLog;
+            m_ComponentFactory = pComponentFactory;
             Name = pName;
             ContainingEntity = pContainingEntity;
         }
 
         #region Component Management
         /// <summary>
-        /// Register an Module interface.
+        /// Create a component of the given type and add it to the entity.
+        /// The component is created using the ComponentFactory.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="iface"></param>
+        /// <typeparam name="T">Type of the component to create</typeparam>
+        /// <param name="parameters">parameters for the component constructor</param>
+        public void CreateAndAddComponent<T>(params object[] parameters) where T : class, IComponent {
+            var cmpt = m_ComponentFactory.CreateComponent<T>(parameters);
+            cmpt.ContainingEntity = this;
+            AddComponent<T>(cmpt);
+        }
+
+        /// <summary>
+        /// Register a Component with the entity.
+        /// </summary>
+        /// <typeparam name="T">Type of the component to add</typeparam>
+        /// <param name="pComponent">The component instance to add</param>
         public void AddComponent<T>(T pComponent) where T : class, IComponent {
             lock (m_components) {
-                if (!m_components.ContainsKey(typeof(T))) {
+                if (m_components.ContainsKey(typeof(T))) {
+                    m_log.Log(MBLogLevel.DBADERROR, "Entity.AddComponent: Component of type {0} already exists in entity {1}",
+                            typeof(T).ToString(), Name.Name);
+                } else {
                     m_components.Add(typeof(T), pComponent);
                 }
             }
