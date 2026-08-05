@@ -18,11 +18,14 @@ using org.herbal3d.mblue;
 using org.herbal3d.mblue.Logging;
 
 namespace org.herbal3d.mblue.ecm {
+
     public interface IComponent : IDumpable, IDisposable {
         // The name of the component type. This is used to identify the component type in the entity.
         public string TypeName { get; }
+
         // The entity that contains this component
         Entity ContainingEntity { get; set; }
+
         void Update(UpdateInfo what);
     }
 }
