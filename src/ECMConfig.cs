@@ -9,7 +9,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace org.herbal3d.mblue.Logging {
+namespace org.herbal3d.mblue.ecm {
 
     public class ECMConfig {
 
