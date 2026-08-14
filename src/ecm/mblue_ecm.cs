@@ -12,16 +12,20 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace org.herbal3d.mblue.ecm {
+namespace org.herbal3d.mblue.ecm
+{
 
-    public static class MBlueECMServiceSetup {
+    public static class MBlueECMServiceSetup
+    {
 
-        public static IServiceCollection AddServices(this IServiceCollection pServices, IConfiguration pConfig) {
+        public static IServiceCollection AddServices(this IServiceCollection pServices, IConfiguration pConfig)
+        {
             return pServices
                 .Configure<ECMConfig>(pConfig.GetSection(ECMConfig.subSectionName))
                 .AddTransient<UpdateInfo>()
                 .AddTransient<AuthInfo>()
                 .AddTransient<Entity>()
+                .AddSingleton<EventBus>()
                 .AddSingleton<EntityFactory>()
                 .AddSingleton<ComponentFactory>()
             ;

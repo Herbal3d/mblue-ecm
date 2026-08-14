@@ -9,23 +9,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text.Json.Nodes;
+using MBSD = org.herbal3d.mblue.StructuredData;
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+namespace org.herbal3d.mblue.ecm;
 
-using org.herbal3d.mblue;
-using org.herbal3d.mblue.Logging;
+/// <summary>
+/// Lights that fill the world. Used for sun and moon. Individual object 
+/// lighting is done by the entities themselves.
+/// </summary>
+public interface ICmptLight : IComponent
+{
+    bool Visible { get; set; }
 
-namespace org.herbal3d.mblue.ecm {
+    MBSD.Color4 Color { get; set; }
 
-    public interface IComponent : IDumpable, IDisposable {
-        // The name of the component type. This is used to identify the component type in the entity.
-        public string TypeName { get; }
+    MBSD.Vector3 Position { get; set; }
 
-        // The entity that contains this component
-        Entity ContainingEntity { get; set; }
-
-        void Update(UpdateInfo what);
-    }
+    MBSD.Vector3 Target { get; set; }
 }

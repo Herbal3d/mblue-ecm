@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/mblue_ecm.csproj" />
+    <Project Path="src/ecm/ecm.csproj" />
+    <Project Path="src/Interface/Interface.csproj" />
   </Folder>
 </Solution>
