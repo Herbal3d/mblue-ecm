@@ -13,8 +13,7 @@ using MBSD = org.herbal3d.mblue.StructuredData;
 
 namespace org.herbal3d.mblue.ecm;
 
-public interface ICmptCamera : IComponent
-{
+public interface ICmptCamera : IComponent {
 
     public MBSD.Vector3 InitDirection { get; set; }
 
@@ -41,7 +40,5 @@ public interface ICmptCamera : IComponent
     public double Zoom { get; set; }
 
     public double Far { get; set; }
-
-    public void UpdateCamera(MBSD.Vector3d position, MBSD.Quaternion heading, double far);
 }
 

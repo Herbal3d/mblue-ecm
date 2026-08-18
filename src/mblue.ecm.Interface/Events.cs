@@ -27,22 +27,19 @@ public interface IEvent { }
 /// <summary>
 /// Marker interface for events tied to a specific entity.
 /// </summary>
-public interface IEntityEvent : IEvent
-{
+public interface IEntityEvent : IEvent {
     IEntity Entity { get; }
     IComponent? Component { get; }
 }
 
-public sealed class EventBus
-{
+public sealed class EventBus {
     // The key is a tuple: (Type of Event, Entity ID).
     // For global (unfiltered) subscriptions, we use 0 as the wildcard.
     private readonly ConcurrentDictionary<(Type EventType, ulong EntityId), Delegate> _handlers = new();
 
     #region Global (Unfiltered) Subscriptions
 
-    public void Subscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent
-    {
+    public void Subscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent {
         var key = (typeof(TEvent), 0UL);
         _handlers.AddOrUpdate(
             key,
@@ -51,8 +48,7 @@ public sealed class EventBus
         );
     }
 
-    public void Unsubscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent
-    {
+    public void Unsubscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent {
         var key = (typeof(TEvent), 0UL);
         _handlers.AddOrUpdate(
             key,
@@ -65,8 +61,7 @@ public sealed class EventBus
 
     #region Entity-Specific (Filtered) Subscriptions
 
-    public void SubscribeToEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent
-    {
+    public void SubscribeToEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent {
         var key = (typeof(TEvent), pEntity.LGID);
         _handlers.AddOrUpdate(
             key,
@@ -75,8 +70,7 @@ public sealed class EventBus
         );
     }
 
-    public void UnsubscribeFromEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent
-    {
+    public void UnsubscribeFromEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent {
         var key = (typeof(TEvent), pEntity.LGID);
         _handlers.AddOrUpdate(
             key,
@@ -91,24 +85,20 @@ public sealed class EventBus
     /// Publishes an event. If the event carries an Entity ID, it triggers
     /// both the entity-specific subscribers AND global subscribers.
     /// </summary>
-    public void Publish<TEvent>(TEvent pEvent) where TEvent : struct, IEvent
-    {
+    public void Publish<TEvent>(TEvent pEvent) where TEvent : struct, IEvent {
         Type eventType = typeof(TEvent);
 
         // 1. Notify global/wildcard subscribers first
         var globalKey = (eventType, 0UL);
-        if (_handlers.TryGetValue(globalKey, out var globalDel))
-        {
+        if (_handlers.TryGetValue(globalKey, out var globalDel)) {
             var globalAction = (Action<TEvent>)globalDel;
             globalAction(pEvent);
         }
 
         // 2. If it is an entity-specific event, notify targeted subscribers
-        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity.LGID != 0UL)
-        {
+        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity.LGID != 0UL) {
             var entityKey = (eventType, entityEvent.Entity.LGID);
-            if (_handlers.TryGetValue(entityKey, out var entityDel))
-            {
+            if (_handlers.TryGetValue(entityKey, out var entityDel)) {
                 var entityAction = (Action<TEvent>)entityDel;
                 entityAction(pEvent);
             }

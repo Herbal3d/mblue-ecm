@@ -11,16 +11,32 @@
 
 using MBSD = org.herbal3d.mblue.StructuredData;
 
-namespace org.herbal3d.mblue.ecm
-{
+namespace org.herbal3d.mblue.ecm {
 
-    public interface ICmptLocation : IComponent
-    {
+    public interface ICmptLocation : IComponent {
 
         MBSD.Quaternion Heading { get; set; }
         MBSD.Vector3 LocalPosition { get; set; }     // position relative to parent (if any)
         MBSD.Vector3 RegionPosition { get; set; }         // position relative to RegionContext
         MBSD.Vector3d GlobalPosition { get; }
 
+    }
+
+    // When a location component is updated, this event is created to capture the new state.
+    public struct LocationUpdateEvent : IEntityEvent {
+        public LocationUpdateEvent(ICmptLocation pComponent) {
+            Entity = pComponent.ContainingEntity;
+            Component = pComponent;
+            LocalPosition = pComponent.LocalPosition;
+            RegionPosition = pComponent.RegionPosition;
+            GlobalPosition = pComponent.GlobalPosition;
+            Heading = pComponent.Heading;
+        }
+        public IEntity Entity { get; set; }
+        public IComponent? Component { get; set; }
+        public MBSD.Vector3 LocalPosition { get; set; }
+        public MBSD.Vector3 RegionPosition { get; set; }
+        public MBSD.Vector3d GlobalPosition { get; set; }
+        public MBSD.Quaternion Heading { get; set; }
     }
 }

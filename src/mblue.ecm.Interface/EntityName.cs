@@ -45,6 +45,11 @@ namespace org.herbal3d.mblue.ecm
             Name = pName;
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public JsonNode? GetDump()
         {
             return new JsonObject()
