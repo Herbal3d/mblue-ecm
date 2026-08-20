@@ -9,10 +9,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using org.herbal3d.mblue.Common;
+
 namespace org.herbal3d.mblue.ecm;
 
-public interface IEntity : IDumpable, IDisposable
-{
+public interface IEntity : IDumpable, IDisposable {
     public EntityName Name { get; }
 
     // The local, session unique identifier for this entity

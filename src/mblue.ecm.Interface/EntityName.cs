@@ -11,8 +11,9 @@
 
 using System.Text.Json.Nodes;
 
-namespace org.herbal3d.mblue.ecm
-{
+using org.herbal3d.mblue.Common;
+
+namespace org.herbal3d.mblue.ecm {
     /// <summary>
     /// EntityName class to hold the name of an entity.
     /// 
@@ -35,25 +36,20 @@ namespace org.herbal3d.mblue.ecm
     /// that is in the process of being ported.
     /// 
     /// </summary>
-    public class EntityName : IDumpable
-    {
+    public class EntityName : IDumpable {
 
         public string Name { get; set; } = "";
 
-        public EntityName(string pName)
-        {
+        public EntityName(string pName) {
             Name = pName;
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return Name;
         }
 
-        public JsonNode? GetDump()
-        {
-            return new JsonObject()
-            {
+        public JsonNode? GetDump() {
+            return new JsonObject() {
                 ["Name"] = Name
             };
         }

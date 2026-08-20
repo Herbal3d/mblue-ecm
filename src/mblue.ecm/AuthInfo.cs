@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using org.herbal3d.mblue;
+using org.herbal3d.mblue.Common;
 using org.herbal3d.mblue.Logging;
 
 namespace org.herbal3d.mblue.ecm {

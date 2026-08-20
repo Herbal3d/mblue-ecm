@@ -9,7 +9,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using MBSD = org.herbal3d.mblue.StructuredData;
+using MBSD = org.herbal3d.mblue.Common.StructuredData;
 
 namespace org.herbal3d.mblue.ecm;
 

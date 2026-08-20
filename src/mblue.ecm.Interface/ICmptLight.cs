@@ -9,7 +9,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using MBSD = org.herbal3d.mblue.StructuredData;
+using MBSD = org.herbal3d.mblue.Common.StructuredData;
 
 namespace org.herbal3d.mblue.ecm;
 
@@ -17,8 +17,7 @@ namespace org.herbal3d.mblue.ecm;
 /// Lights that fill the world. Used for sun and moon. Individual object 
 /// lighting is done by the entities themselves.
 /// </summary>
-public interface ICmptLight : IComponent
-{
+public interface ICmptLight : IComponent {
     bool Visible { get; set; }
 
     MBSD.Color4 Color { get; set; }

@@ -9,12 +9,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using MBSD = org.herbal3d.mblue.StructuredData;
+using MBSD = org.herbal3d.mblue.Common.StructuredData;
 
 namespace org.herbal3d.mblue.ecm;
 
-public interface ICmptAnimation : IComponent
-{
+public interface ICmptAnimation : IComponent {
     // For the moment, there is not much to an animation. Someday this will
     // contain all the stuff for an avatar animation.
     MBSD.Vector3 AngularVelocity { get; set; }

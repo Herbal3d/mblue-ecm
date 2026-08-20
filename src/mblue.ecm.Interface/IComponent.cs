@@ -9,10 +9,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using org.herbal3d.mblue.Common;
+
 namespace org.herbal3d.mblue.ecm;
 
-public interface IComponent : IDumpable, IDisposable
-{
+public interface IComponent : IDumpable, IDisposable {
     // The name of the component type. This is used to identify the component type in the entity.
     public string TypeName { get; }
 
