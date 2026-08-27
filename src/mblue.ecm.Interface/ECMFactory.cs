@@ -29,7 +29,7 @@ namespace org.herbal3d.mblue.ecm {
         protected readonly IServiceProvider _provider;
         protected readonly EventBus _eventBus;
 
-        protected DualIndexDictionary<string, ulong, Entity> _entities = new DualIndexDictionary<string, ulong, Entity>();
+        protected DualIndexDictionary<string, ulong, IEntity> _entities = new DualIndexDictionary<string, ulong, IEntity>();
         protected Dictionary<Type, List<IComponent>> _components = new Dictionary<Type, List<IComponent>>();
 
         public ECMFactory(MBLogger<ECMFactory> pLog,
@@ -46,7 +46,7 @@ namespace org.herbal3d.mblue.ecm {
             public IEntity Entity { get; set; }
             public IComponent? Component { get; } = null;
 
-            public NewEntityEvent(Entity entity) {
+            public NewEntityEvent(IEntity entity) {
                 Entity = entity;
             }
         }
@@ -54,12 +54,12 @@ namespace org.herbal3d.mblue.ecm {
             public IEntity Entity { get; set; }
             public IComponent? Component { get; } = null;
 
-            public ReleasedEntityEvent(Entity entity) {
+            public ReleasedEntityEvent(IEntity entity) {
                 Entity = entity;
             }
         }
-        public Entity CreateEntity(params object[] parameters) {
-            var ent = ActivatorUtilities.CreateInstance<Entity>(_provider, parameters);
+        public IEntity CreateEntity(params object[] parameters) {
+            var ent = ActivatorUtilities.CreateInstance<IEntity>(_provider, parameters);
 
             // Keep track of the types of components being created. This is used for future features like component pooling.
             _entities.Add(ent.Name.Name, ent.LGID, ent);
@@ -70,21 +70,21 @@ namespace org.herbal3d.mblue.ecm {
 
             return ent;
         }
-        public void ReleaseEntity(Entity ent) {
+        public void ReleaseEntity(IEntity ent) {
             _eventBus.Publish(new ReleasedEntityEvent(ent));
             _entities.Remove(ent.Name.Name, ent.LGID);
             ent.Dispose();
         }
 
-        public bool TryGetEntity(ulong lgid, out Entity ent) {
+        public bool TryGetEntity(ulong lgid, out IEntity ent) {
             return _entities.TryGetValue(lgid, out ent);
         }
 
-        public bool TryGetEntity(string entName, out Entity ent) {
+        public bool TryGetEntity(string entName, out IEntity ent) {
             return _entities.TryGetValue(entName, out ent);
         }
 
-        public bool TryGetEntity(EntityName entName, out Entity ent) {
+        public bool TryGetEntity(EntityName entName, out IEntity ent) {
             return _entities.TryGetValue(entName.Name, out ent);
         }
 
@@ -100,12 +100,12 @@ namespace org.herbal3d.mblue.ecm {
         /// <param name="createIt"></param>
         /// <returns>true if we created a new entry</returns>
         public delegate Entity CreateEntityCallback(params object[] parameters);
-        public bool TryGetCreateEntity(EntityName entName, out Entity? ent, params object[] parameters) {
+        public bool TryGetCreateEntity(EntityName entName, out IEntity? ent, params object[] parameters) {
             // m_log.Log(LogLevel.DWORLDDETAIL, "TryGetCreateEntity: n={0}", entName);
             try {
                 lock (this) {
                     if (!TryGetEntity(entName, out ent)) {
-                        Entity newEntity = this.CreateEntity(entName, parameters);
+                        IEntity newEntity = this.CreateEntity(entName, parameters);
                         ent = newEntity;
                     }
                 }
@@ -118,14 +118,14 @@ namespace org.herbal3d.mblue.ecm {
         }
         */
 
-        public Entity? FindEntity(Predicate<Entity> pred) {
+        public IEntity? FindEntity(Predicate<IEntity> pred) {
             return _entities.FindValue(pred);
         }
 
         // Perform an action on each entity in the collection.
         // The collection is locked for the duration of the action,
         //     so the action should be quick and not call back into the collection.
-        public void ForEach(Action<Entity> act) {
+        public void ForEach(Action<IEntity> act) {
             lock (this) {
                 _entities.ForEach(act);
             }
@@ -138,7 +138,7 @@ namespace org.herbal3d.mblue.ecm {
         /// </summary>
         /// <typeparam name="T">Type of the component to create</typeparam>
         /// <param name="parameters">parameters for the component constructor</param>
-        public Entity CreateAndAddComponent<T>(Entity pEntity, params object[] parameters) where T : class, IComponent {
+        public IEntity CreateAndAddComponent<T>(IEntity pEntity, params object[] parameters) where T : class, IComponent {
             var cmpt = CreateComponent<T>(parameters);
             cmpt.ContainingEntity = pEntity;
             pEntity.AddComponent<T>(cmpt);

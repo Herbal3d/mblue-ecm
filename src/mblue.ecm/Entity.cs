@@ -86,10 +86,10 @@ namespace org.herbal3d.mblue.ecm {
         /// matches first, then will look for derived types.
         /// This allows adding LLCmptLocation and looking it up as ICmptLocation.
         /// </summary>
-        /// <param name="pType"></param>
-        /// <param name="pComponent"></param>
-        /// <returns></returns>
-        public bool TryGetComponent<T>(out IComponent pComponent) {
+        /// <typeparam name="T">Type of the component to get</typeparam>
+        /// <param name="pComponent">The component instance if found, otherwise null</param>
+        /// <returns>True if the component was found, otherwise false</returns>
+        public bool TryGetComponent<T>(out IComponent pComponent) where T : class, IComponent {
             lock (m_components) {
                 if (m_components.TryGetValue(typeof(T), out IComponent? found)) {
                     if (found is not null) {
@@ -138,18 +138,9 @@ namespace org.herbal3d.mblue.ecm {
         /// This allows adding LLCmptLocation and looking it up as ICmptLocation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <returns>True if the component exists, otherwise false</returns>
         public bool HasComponent<T>() where T : class, IComponent {
             return TryGetComponent<T>(out _);
-        }
-        // Test and return component if it exists
-        public bool HasComponent<T>(out T? component) where T : class, IComponent {
-            if (TryGetComponent<T>(out IComponent cmpt)) {
-                component = (T)cmpt;
-                return true;
-            }
-            component = null;
-            return false;
         }
         #endregion Component Management
 

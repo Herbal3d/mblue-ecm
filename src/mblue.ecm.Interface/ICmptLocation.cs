@@ -32,7 +32,7 @@ namespace org.herbal3d.mblue.ecm {
             GlobalPosition = pComponent.GlobalPosition;
             Heading = pComponent.Heading;
         }
-        public IEntity Entity { get; set; }
+        public IEntity? Entity { get; set; }
         public IComponent? Component { get; set; }
         public MBSD.Vector3 LocalPosition { get; set; }
         public MBSD.Vector3 RegionPosition { get; set; }

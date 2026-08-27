@@ -28,7 +28,7 @@ public interface IEvent { }
 /// Marker interface for events tied to a specific entity.
 /// </summary>
 public interface IEntityEvent : IEvent {
-    IEntity Entity { get; }
+    IEntity? Entity { get; }
     IComponent? Component { get; }
 }
 
@@ -96,7 +96,7 @@ public sealed class EventBus {
         }
 
         // 2. If it is an entity-specific event, notify targeted subscribers
-        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity.LGID != 0UL) {
+        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity != null && entityEvent.Entity.LGID != 0UL) {
             var entityKey = (eventType, entityEvent.Entity.LGID);
             if (_handlers.TryGetValue(entityKey, out var entityDel)) {
                 var entityAction = (Action<TEvent>)entityDel;

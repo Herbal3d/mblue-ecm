@@ -27,11 +27,9 @@ public interface IEntity : IDumpable, IDisposable {
     // public void RemoveComponent(IComponent component);
 
     // Get a component of a specific type from the entity
-    public bool TryGetComponent<T>(out IComponent pComponent);
+    public bool TryGetComponent<T>(out IComponent pComponent) where T : class, IComponent;
     public T Cmpt<T>() where T : class, IComponent;
     public bool HasComponent<T>() where T : class, IComponent;
-    public bool HasComponent<T>(out T? component) where T : class, IComponent;
-
 
 }
 

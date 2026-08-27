@@ -18,6 +18,6 @@ public interface IComponent : IDumpable, IDisposable {
     public string TypeName { get; }
 
     // The entity that contains this component
-    IEntity ContainingEntity { get; set; }
+    IEntity? ContainingEntity { get; set; }
 
 }
