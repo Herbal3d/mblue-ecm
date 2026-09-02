@@ -3,4 +3,5 @@
     <Project Path="src/mblue.ecm/mblue.ecm.csproj" />
     <Project Path="src/mblue.ecm.Interface/mblue.ecm.Interface.csproj" />
   </Folder>
+  <Project Path="../mblue-common/src/mblue.common.csproj" />
 </Solution>
