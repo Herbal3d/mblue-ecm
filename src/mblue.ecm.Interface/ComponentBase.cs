@@ -14,16 +14,16 @@ using System.Text.Json.Nodes;
 namespace org.herbal3d.mblue.ecm;
 
 // Helper base class for components
-public class ComponentBase : IComponent {
+public class ComponentBase<T> : IComponent {
     public string TypeName { get; protected set; }
     public IEntity? ContainingEntity { get; set; }
 
-    public ComponentBase(string typeName) {
-        TypeName = typeName;
+    public ComponentBase() {
+        TypeName = typeof(T).FullName ?? typeof(T).Name;
     }
 
-    public ComponentBase(string typeName, IEntity? containingEntity) {
-        TypeName = typeName;
+    public ComponentBase(IEntity? containingEntity) {
+        TypeName = typeof(T).FullName ?? typeof(T).Name;
         ContainingEntity = containingEntity;
     }
 
