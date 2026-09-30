@@ -32,51 +32,67 @@ public interface IEntityEvent : IEvent {
     IComponent? Component { get; }
 }
 
+public struct SubscriptionHandle {
+    public Type EventType { get; }
+    public ulong EntityId { get; }
+    public Delegate Handler { get; }
+
+    public SubscriptionHandle(Type eventType, ulong entityId, Delegate handler) {
+        EventType = eventType;
+        EntityId = entityId;
+        Handler = handler;
+    }
+}
+
 public sealed class EventBus {
-    // The key is a tuple: (Type of Event, Entity ID).
-    // For global (unfiltered) subscriptions, we use 0 as the wildcard.
-    private readonly ConcurrentDictionary<(Type EventType, ulong EntityId), Delegate> _handlers = new();
+    private readonly ConcurrentDictionary<Type, HashSet<SubscriptionHandle>> _subscriptions = new();
 
     #region Global (Unfiltered) Subscriptions
 
-    public void Subscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent {
-        var key = (typeof(TEvent), 0UL);
-        _handlers.AddOrUpdate(
-            key,
-            handler,
-            (_, existing) => Delegate.Combine(existing, handler)
-        );
+    public SubscriptionHandle Subscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent {
+        var handle = new SubscriptionHandle(typeof(TEvent), 0UL, handler);
+        lock (_subscriptions) {
+            if (!_subscriptions.ContainsKey(typeof(TEvent))) {
+                _subscriptions[typeof(TEvent)] = new HashSet<SubscriptionHandle>();
+            }
+            _subscriptions[typeof(TEvent)].Add(handle);
+        }
+        return handle;
     }
 
-    public void Unsubscribe<TEvent>(Action<TEvent> handler) where TEvent : struct, IEvent {
-        var key = (typeof(TEvent), 0UL);
-        _handlers.AddOrUpdate(
-            key,
-            handler,
-            (_, existing) => Delegate.Remove(existing, handler)!
-        );
+    public void Unsubscribe(SubscriptionHandle handle) {
+        lock (_subscriptions) {
+            if (_subscriptions.ContainsKey(handle.EventType)) {
+                _subscriptions[handle.EventType].Remove(handle);
+            }
+        }
     }
 
     #endregion
 
     #region Entity-Specific (Filtered) Subscriptions
 
-    public void SubscribeToEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent {
-        var key = (typeof(TEvent), pEntity.LGID);
-        _handlers.AddOrUpdate(
-            key,
-            handler,
-            (_, existing) => Delegate.Combine(existing, handler)
-        );
+    public SubscriptionHandle SubscribeToEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEvent {
+        var handle = new SubscriptionHandle(typeof(TEvent), pEntity.LGID, handler);
+        lock (_subscriptions) {
+            if (!_subscriptions.ContainsKey(typeof(TEvent))) {
+                _subscriptions[typeof(TEvent)] = new HashSet<SubscriptionHandle>();
+            }
+            _subscriptions[typeof(TEvent)].Add(handle);
+        }
+        return handle;
     }
 
-    public void UnsubscribeFromEntity<TEvent>(IEntity pEntity, Action<TEvent> handler) where TEvent : struct, IEntityEvent {
-        var key = (typeof(TEvent), pEntity.LGID);
-        _handlers.AddOrUpdate(
-            key,
-            handler,
-            (_, existing) => Delegate.Remove(existing, handler)!
-        );
+    // Remove all the event subscriptions for a specific entity (used when destroying an entity)
+    public void UnsubscribeFromEntityAll(IEntity pEntity) {
+        lock (_subscriptions) {
+            foreach (var key in _subscriptions.Keys) {
+                var keysToRemove = _subscriptions[key].Where(k => k.EntityId == pEntity.LGID).ToList();
+                foreach (var sub in keysToRemove) {
+                    _subscriptions[key].Remove(sub);
+                }
+            }
+        }
     }
 
     #endregion
@@ -87,20 +103,18 @@ public sealed class EventBus {
     /// </summary>
     public void Publish<TEvent>(TEvent pEvent) where TEvent : struct, IEvent {
         Type eventType = typeof(TEvent);
-
-        // 1. Notify global/wildcard subscribers first
-        var globalKey = (eventType, 0UL);
-        if (_handlers.TryGetValue(globalKey, out var globalDel)) {
-            var globalAction = (Action<TEvent>)globalDel;
-            globalAction(pEvent);
+        ulong entityId = 0UL;
+        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity != null && entityEvent.Entity.LGID != 0UL) {
+            entityId = entityEvent.Entity.LGID;
         }
 
-        // 2. If it is an entity-specific event, notify targeted subscribers
-        if (pEvent is IEntityEvent entityEvent && entityEvent.Entity != null && entityEvent.Entity.LGID != 0UL) {
-            var entityKey = (eventType, entityEvent.Entity.LGID);
-            if (_handlers.TryGetValue(entityKey, out var entityDel)) {
-                var entityAction = (Action<TEvent>)entityDel;
-                entityAction(pEvent);
+        // 1. Notify global/wildcard subscribers first
+        var handles = _subscriptions.ContainsKey(eventType) ? _subscriptions[eventType] : new HashSet<SubscriptionHandle>();
+        foreach (var handle in handles) {
+            // If the subscription is either global (EntityId == 0) or matches the specific entity ID, invoke the handler.
+            if (handle.EntityId == 0UL || handle.EntityId == entityId) {
+                var globalAction = handle.Handler as Action<TEvent>;
+                globalAction?.Invoke(pEvent);
             }
         }
     }

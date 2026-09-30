@@ -15,10 +15,13 @@ using org.herbal3d.mblue.Common;
 using org.herbal3d.mblue.Logging;
 
 namespace org.herbal3d.mblue.ecm {
+
+    // event that reports entity changes with the UpdateInfo, including the affected component if applicable
     public class Entity : IEntity {
         protected MBLogger<Entity> m_log;
 
         protected ECMFactory m_factory;
+        protected EventBus m_eventBus;
 
         // Every entity has a local, session scoped ID
         protected ulong m_LGID = 0;
@@ -41,12 +44,14 @@ namespace org.herbal3d.mblue.ecm {
 
         public Entity(MBLogger<Entity> pLog,
                       ECMFactory pFactory,
+                      EventBus pEventBus,
                       EntityName? pName = null,
                       Entity? pContainingEntity = null) {
             m_log = pLog;
             m_factory = pFactory;
             Name = pName ?? new EntityName($"entity://LGID-{this.LGID}");
             ContainingEntity = pContainingEntity;
+            m_eventBus = pEventBus;
         }
 
         #region Component Management
@@ -145,6 +150,8 @@ namespace org.herbal3d.mblue.ecm {
         #endregion Component Management
 
         public virtual void Dispose() {
+            m_eventBus?.UnsubscribeFromEntityAll(this);
+
             // tell all the interfaces we're done with them
             foreach (var kvp in m_components) {
                 try {
@@ -170,6 +177,19 @@ namespace org.herbal3d.mblue.ecm {
             }
             ret["Components"] = components;
             return ret;
+        }
+
+        SubscriptionHandle IEntity.SubscribeToEvent<T>(Action<T> handler) {
+            return m_eventBus.SubscribeToEntity<T>(this, handler);
+        }
+
+        void IEntity.UnsubscribeFromEvent(SubscriptionHandle handle) {
+            m_eventBus.Unsubscribe(handle);
+        }
+
+        // Publish an update event for this entity based on UpdateInfo
+        void IEntity.Update(UpdateInfo updateInfo) {
+            m_eventBus?.Publish(new EntityUpdateEvent(this, updateInfo, null));
         }
     }
 }

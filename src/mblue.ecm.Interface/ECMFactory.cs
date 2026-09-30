@@ -138,9 +138,8 @@ namespace org.herbal3d.mblue.ecm {
         /// </summary>
         /// <typeparam name="T">Type of the component to create</typeparam>
         /// <param name="parameters">parameters for the component constructor</param>
-        public IEntity CreateAndAddComponent<T>(IEntity pEntity, params object[] parameters) where T : class, IComponent {
-            var cmpt = CreateComponent<T>(parameters);
-            cmpt.ContainingEntity = pEntity;
+        public IEntity CreateAndAddComponent<T>(IEntity pEntity, params object[] pParams) where T : class, IComponent {
+            var cmpt = CreateComponent<T>(pEntity, pParams);
             pEntity.AddComponent<T>(cmpt);
             return pEntity;
         }

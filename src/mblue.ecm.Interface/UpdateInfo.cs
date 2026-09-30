@@ -11,7 +11,13 @@
 
 namespace org.herbal3d.mblue.ecm;
 
+// First implementation of update tracking information for entities and components.
+// This uses a bitmask approach to track which aspects of an entity or component have been updated.
+// Maybe this will be extended in the future to include more sophisticated update tracking mechanisms.
 public struct UpdateInfo {
+    public UpdateInfo() {
+        Codes = UpdateCodes.None;
+    }
     public UpdateInfo(UpdateCodes codes) {
         Codes = codes;
     }
@@ -23,6 +29,7 @@ public struct UpdateInfo {
     public UpdateInfo AddFlag(UpdateCodes code) { Codes |= code; return this; }
 
     public UpdateInfo RemoveFlag(UpdateCodes code) { Codes &= ~code; return this; }
+    public bool HasFlag(UpdateCodes code) { return (Codes & code) != 0; }
 
     public override string ToString() => UpdateInfoUtil.UpdateCodesToString(Codes);
 }

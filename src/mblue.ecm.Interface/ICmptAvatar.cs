@@ -11,9 +11,7 @@
 
 namespace org.herbal3d.mblue.ecm;
 
-public interface ICmptAvatar : IComponent
-{
-
+public interface ICmptAvatar : IComponent {
     string DisplayName { get; set; }
     string ActivityFlags { get; set; }
 

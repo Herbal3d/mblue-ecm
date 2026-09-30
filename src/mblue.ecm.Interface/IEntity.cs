@@ -31,5 +31,25 @@ public interface IEntity : IDumpable, IDisposable {
     public T Cmpt<T>() where T : class, IComponent;
     public bool HasComponent<T>() where T : class, IComponent;
 
+    // Cause an update event.
+    // This is used so multiple changes can be batched together before notifying listeners.
+    public void Update(UpdateInfo updateInfo);
+
+    // Events
+    public SubscriptionHandle SubscribeToEvent<T>(Action<T> handler) where T : struct, IEvent;
+    public void UnsubscribeFromEvent(SubscriptionHandle handle);
+
 }
 
+// Event created by an entity to report updates, including the affected component if applicable
+// Update flags are in UpdateInfo.
+public struct EntityUpdateEvent : IEntityEvent {
+    public IEntity Entity { get; }
+    public IComponent? Component { get; }
+    public UpdateInfo UpdateInfo { get; }
+    public EntityUpdateEvent(IEntity pEntity, UpdateInfo pUpdateInfo, IComponent? pComponent = null) {
+        Entity = pEntity;
+        UpdateInfo = pUpdateInfo;
+        Component = pComponent;
+    }
+}
